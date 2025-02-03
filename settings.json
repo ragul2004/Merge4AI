@@ -1,0 +1,33 @@
+{
+    "folder_path": "",
+    "excluded_folders": [
+        "node_modules",
+        ".git"
+    ],
+    "excluded_extensions": [
+        ".1",
+        ".applescript",
+        ".bnf",
+        ".cjs",
+        ".css",
+        ".cts",
+        ".flow",
+        ".gemspec",
+        ".html",
+        ".ico",
+        ".json",
+        ".lock",
+        ".map",
+        ".md",
+        ".mjs",
+        ".mts",
+        ".node",
+        ".opts",
+        ".rb",
+        ".sample",
+        ".svg",
+        ".tsbuildinfo",
+        ".txt",
+        ".yml"
+    ]
+}
