@@ -15,7 +15,8 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QListWidgetItem,
     QLabel,
-    QSplitter
+    QSplitter,
+    QComboBox  # Добавляем QComboBox для выпадающего списка
 )
 from PyQt5.QtCore import Qt
 
@@ -60,8 +61,18 @@ class FileMergerApp(QWidget):
         self.extensions_widget.setMinimumHeight(150)  # Увеличенная высота
         left_layout.addWidget(self.extensions_widget)
 
-        # Правая часть (список файлов + текстовое поле)
+        # Правая часть (выпадающий список, список файлов + текстовое поле)
         right_layout = QVBoxLayout()
+
+        # Выпадающий список для выбора префикса перед относительным путем файла
+        prefix_layout = QHBoxLayout()
+        prefix_label = QLabel("Префикс:")
+        prefix_layout.addWidget(prefix_label)
+        self.prefix_combo = QComboBox(self)
+        self.prefix_combo.addItems(["//", "#"])
+        self.prefix_combo.setCurrentIndex(0)  # По умолчанию "//"
+        prefix_layout.addWidget(self.prefix_combo)
+        right_layout.addLayout(prefix_layout)
 
         # Список файлов
         self.file_list_label = QLabel("Файлы:")
@@ -93,6 +104,7 @@ class FileMergerApp(QWidget):
         self.setLayout(main_layout)
         self.setWindowTitle("Слияние файлов")
         self.setGeometry(300, 300, 800, 500)
+        self.setMinimumSize(600, 400)  # Теперь окно можно ресайзить по-жесткому
 
         # Если есть сохранённая папка, сканируем её
         if self.folder_path_input.text():
@@ -189,16 +201,22 @@ class FileMergerApp(QWidget):
     def copy_files_content(self):
         """Копирует содержимое выбранных файлов в текстовое поле."""
         self.output_text_edit.clear()
+        selected_prefix = self.prefix_combo.currentText()
         for i in range(self.file_list_widget.count()):
             list_item = self.file_list_widget.item(i)
             widget = self.file_list_widget.itemWidget(list_item)
             if isinstance(widget, QCheckBox) and widget.isChecked():
                 file_path = widget.file_path
-                relative_path = widget.text()
+                relative_path = widget.text()  # относительный путь уже здесь
                 try:
                     with open(file_path, "r", encoding="utf-8") as file:
                         content = file.read()
-                        self.output_text_edit.append(f"//{relative_path}\n{content}\n")
+                        header = f"{selected_prefix} {relative_path}"
+                        # Если файл уже начинается с нужного префикса + пути, не дублируем
+                        if content.lstrip().startswith(header):
+                            self.output_text_edit.append(f"{content}\n")
+                        else:
+                            self.output_text_edit.append(f"{header}\n\n{content}\n")
                 except Exception as e:
                     QMessageBox.warning(self, "Ошибка", f"Ошибка чтения файла:\n{file_path}\n{str(e)}")
 
